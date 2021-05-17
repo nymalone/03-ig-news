@@ -22,7 +22,7 @@ export default NextAuth({
             q.Not(
               q.Exists(
                 q.Match(
-                  q.Index("user-by-email"), // o indixe que criei no db
+                  q.Index("user_by_email"), // o indixe que criei no db
                   q.Casefold(user.email) // tudo lowercase
                 )
               )
@@ -32,7 +32,7 @@ export default NextAuth({
                 email,
               },
             }),
-            q.Get(q.Match(q.Index("user-by-email"), q.Casefold(user.email)))
+            q.Get(q.Match(q.Index("user_by_email"), q.Casefold(user.email)))
           )
         );
         return true;
