@@ -17,10 +17,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   // só quero aceitar req do tipo POST pq eu estou criando uma checkout session do stripe
   if (req.method === "POST") {
     // quando o usuário criar na intenção de compra eu vou criar um customer pra ele dentro do painel do stripe
-    const session = await getSession();
+    const session = await getSession({ req });
 
     const user = await fauna.query<User>(
       q.Get(q.Match(q.Index("user_by_email"), q.Casefold(session.user.email)))
+      
     );
 
     let customerId = user.data.stripe_customer_id;
@@ -55,7 +56,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       mode: "subscription",
       allow_promotion_codes: true, // posso criar cupom de desconto
       success_url: process.env.STRIPE_SUCCESS_URL,
-      cancel_url: process.env.STRIPE_CANCEL_UR,
+      cancel_url: process.env.STRIPE_CANCEL_URL,
     });
     return res.status(200).json({ sessionId: stripeCheckoutSession.id });
   } else {
