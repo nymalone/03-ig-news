@@ -21,6 +21,10 @@ export const config = {
   }
 }
 
+const relevantEvents = new Set([
+  'session.checkout.completed'
+])
+
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const buf = await buffer(req) // dentro do buf tenho a minha requisição em si 
@@ -31,10 +35,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     try {
       event = stripe.webhooks.constructEvent(buf, secret, process.env.STRIPE_WEBHOOK_SECRET);
     } catch (err) {
-      return res.status(400).send(`WWebhook error ${err.message}`);
+      return res.status(400).send(`Webhook error ${err.message}`);
     }
 
-    res.status(200).json({ ok: true})
+    const {type} = event
+
+    if (relevantEvents.has(type)) {
+      console.log('Evento recebido', event)
+    }
+
+    res.json({ received: true})
   } else {
     res.setHeader('Allow', 'POST')
     res.status(405).end('Method not allowed')
